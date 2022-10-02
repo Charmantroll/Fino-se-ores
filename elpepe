@@ -1,0 +1,713 @@
+if game:GetService("CoreGui"):FindFirstChild("Jugadores") then
+	game:GetService("CoreGui").Jugadores:Destroy()
+end
+print("Amlo222")
+local jugadores = game.Players
+print("Amlo")
+local player = jugadores.LocalPlayer
+print("Aml12")
+local Character1 = player.Character
+print("Amlo2")
+Character1.Archivable = true
+Character1.Animate.Disabled = true
+local clon = Character1:Clone()
+clon.Parent = workspace
+clon.Animate.Disabled = false
+player.Character = clon
+wait(2)
+local oldhum = Character1:FindFirstChildWhichIsA("Humanoid")
+local newhum = oldhum:Clone()
+newhum.Parent = Character1
+newhum.RequiresNeck = false
+oldhum.Parent = nil
+newhum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+wait(2)
+print("Amlo2")
+player.Character = Character1
+clon:Destroy()
+newhum:GetPropertyChangedSignal("Health"):Connect(
+function()
+	if newhum.Health <= 0 then
+		oldhum.Parent = Character
+		wait(1)
+		oldhum:Destroy()
+	end
+end)
+workspace.CurrentCamera.CameraSubject = Character1
+if Character1:FindFirstChild("Animate") then
+	Character1.Animate.Disabled = true
+	wait(.1)
+	Character1.Animate.Disabled = false
+end
+
+
+wait(4)
+
+if game:GetService("CoreGui"):FindFirstChild("Notificacion") then
+    game:GetService("CoreGui").Notificacion:Destroy()
+end
+
+
+local TweenService = game:GetService("TweenService")
+
+local Notificacion = Instance.new("ScreenGui")
+local Frame = Instance.new("TextLabel")
+local UICorner = Instance.new("UICorner")
+local UIStroke = Instance.new("UIStroke")
+
+Notificacion.Name = "Notificacion"
+Notificacion.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Notificacion.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame.Name = "Frame"
+Frame.Parent = Notificacion
+Frame.BackgroundColor3 = Color3.fromRGB(254, 247, 234)
+Frame.Position = UDim2.new(0.484621823, 0, -0.1, 0)
+Frame.Size = UDim2.new(0, 35, 0, 35)
+Frame.Font = Enum.Font.Gotham
+Frame.Text = "Notificacion"
+Frame.TextColor3 = Color3.fromHex("#545d60")
+Frame.TextSize = 16.000
+Frame.TextWrapped = true
+
+UICorner.CornerRadius = UDim.new(0, 5)
+UICorner.Parent = Frame
+
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(244, 234, 218)
+UIStroke.Parent = Frame
+UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+local TiposNoti = {
+    ["Aviso"] = {
+        ["Color1"] = Color3.fromHex("#e6eff8"),
+        ["Color2"] = Color3.fromHex("#c6d4e2")
+    },
+    ["Warn"] = {
+        ["Color1"] = Color3.fromHex("#fef7ea"),
+        ["Color2"] = Color3.fromHex("#f4eada")
+    },
+    ["Bien"] = {
+        ["Color1"] = Color3.fromHex("#ebf6ee"),
+        ["Color2"] = Color3.fromHex("#e2f1e7")
+    }
+}
+
+local Twenear = function(parte, duracion, tabla)
+    local info = TweenInfo.new(duracion, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local Anim = TweenService:Create(parte, info, tabla)
+    Anim:Play()
+    return Anim
+end
+
+local Notificacion = function(mensaje, modo, tiempo)
+    print(mensaje)
+    if TiposNoti[modo] then
+        local ciclo = coroutine.wrap(function()
+        print("Encontrado")
+        Frame.Text = mensaje
+        
+        Frame.BackgroundColor3 = TiposNoti[modo].Color1
+        UIStroke.Color = TiposNoti[modo].Color2
+        
+        
+        local Animacion = Twenear(Frame, 0.5, {Position = UDim2.new(0.485, 0,0.01, 0)})
+        Animacion.Completed:Wait()
+        local ANimacion2 = Twenear(Frame, 0.5, {Size = UDim2.new(0.3,0, 0, 35), Position = UDim2.new(0.35, 0, 0.01, 0)})
+        ANimacion2.Completed:Wait()
+        
+        wait(tiempo)
+        local AnimFinal = Twenear(Frame, 0.5, {Size = UDim2.new(0, 35, 0, 35), Position = UDim2.new(0.484621823, 0, 0.01, 0)})
+        AnimFinal.Completed:Wait()
+        
+        Twenear(Frame, 0.5, {Position = UDim2.new(0.484621823, 0, -0.1, 0)})
+        end)
+        
+        ciclo()
+    end
+
+end
+
+
+
+local UserInput = game:GetService("UserInputService")
+local CharVictima = game.Players:GetChildren()[math.random(1, #game.Players:GetChildren())].Character
+local MyChar = game.Players.LocalPlayer.Character
+local MyRoot = MyChar.HumanoidRootPart
+
+workspace.FallenPartsDestroyHeight = -50000
+
+while not CharVictima:FindFirstChild("Torso") and not CharVictima:FindFirstChild("UpperTorso") and CharVictima ~= game.Players.LocalPlayer.Character do
+	CharVictima = game.Players:GetChildren()[math.random(1, #game.Players:GetChildren())].Character
+end
+
+local function getY(part)
+	local Ignoralist = {}
+
+	for i,v in pairs(part.Parent:GetDescendants()) do
+		if v:IsA("BasePart") then
+			table.insert(Ignoralist, v)
+		end
+
+	end
+
+	local Ray = Ray.new(part.Position, Vector3.new(0, -400, 0))
+	local Hit, Pos = workspace:FindPartOnRayWithIgnoreList(Ray, Ignoralist)
+	return Pos.Y + 2.5
+end
+
+local function CreateFakeRootPart(Character)
+	local Humanoid = Character:FindFirstChild("Humanoid")
+	if Humanoid then
+		if not Character:FindFirstChild("FRootPart") then
+			local RootPart = Character:FindFirstChild("HumanoidRootPart")
+			if not RootPart then
+				local FakeRootPart = Instance.new("Part")
+				FakeRootPart.Name = "HumanoidRootPart"
+				FakeRootPart.Anchored = true
+				FakeRootPart.CanCollide = false
+				FakeRootPart.Size = Vector3.new(2,2,1)
+				FakeRootPart.CFrame = CFrame.new(0,0,0)
+				FakeRootPart.Parent = Character
+				FakeRootPart.Transparency = 0.5
+
+				game:GetService("RunService").RenderStepped:Connect(function()
+					if getY(Character.Torso) > 0 then
+						FakeRootPart.Position = Vector3.new(Character.Torso.Position.X, getY(Character.Torso), Character.Torso.Position.Z)
+						FakeRootPart.Orientation = Vector3.new(0, Character.Torso.Orientation.Y, 0)
+
+					end
+				end)
+
+			elseif RootPart then
+				RootPart:Destroy()
+				local FakeRootPart = Instance.new("Part")
+				FakeRootPart.Name = "HumanoidRootPart"
+				FakeRootPart.Anchored = true
+				FakeRootPart.CanCollide = false
+				FakeRootPart.Size = Vector3.new(2,2,1)
+				FakeRootPart.CFrame = CFrame.new(0,0,0)
+				FakeRootPart.Parent = Character
+				FakeRootPart.Transparency = 0.5
+
+				game:GetService("RunService").RenderStepped:Connect(function()
+					if getY(Character.Torso) > 0 then
+						FakeRootPart.Position = Vector3.new(Character.Torso.Position.X, getY(Character.Torso), Character.Torso.Position.Z)
+						FakeRootPart.Orientation = Vector3.new(0, Character.Torso.Orientation.Y, 0)
+					end
+				end)
+				
+			end
+		end
+	end
+end
+
+
+for i,v in pairs(game.Players:GetChildren()) do
+	if v ~=	game.Players.LocalPlayer then
+
+		if v.Character:FindFirstChild("Torso") then
+			CreateFakeRootPart(v.Character)
+		end
+
+		v.CharacterAdded:Connect(function(chargod112)
+			wait(1)
+			if chargod112:FindFirstChild("Torso") then
+				CreateFakeRootPart(chargod112)
+			end
+		end)
+	end
+end
+
+game.Players.PlayerAdded:Connect(function(ju)
+	ju.CharacterAdded:Connect(function(chargod23)
+		wait(1)
+		if chargod23:FindFirstChild("Torso") then
+			CreateFakeRootPart(chargod23)
+		end
+	end)
+end)
+
+if CharVictima:FindFirstChild("HumanoidRootPart") then
+	RootVictoma = CharVictima.HumanoidRootPart
+end
+
+local tipogod = "R6"
+local OtrasPartes = {}
+local HatsVictima = {}
+local misHats = {}
+
+local Align = function(Part0, Part1)
+	local Attach0 = Instance.new("Attachment", Part0)
+	local Attach1 = Instance.new("Attachment", Part1)
+
+	local Position = Instance.new("AlignPosition", Part0)
+	Position.RigidityEnabled = false;
+	Position.MaxVelocity = math.huge;
+	Position.Responsiveness = math.huge;
+	Position.ApplyAtCenterOfMass = false;
+	Position.MaxForce = 20000;
+	Position.ReactionForceEnabled = false;
+
+	local Orientation = Instance.new("AlignOrientation", Part0)
+	Orientation.MaxTorque = 20000;
+	Orientation.ReactionTorqueEnabled = false;
+	Orientation.PrimaryAxisOnly = false;
+	Orientation.Responsiveness = math.huge;
+	Orientation.MaxAngularVelocity = math.huge;
+
+	Orientation.Attachment0 = Attach0;
+	Orientation.Attachment1 = Attach1;
+	Position.Attachment0 = Attach0;
+	Position.Attachment1 = Attach1;
+end
+
+if CharVictima:FindFirstChild("Left Leg") then
+	OtrasPartes["PI"] = CharVictima["Left Leg"]
+elseif CharVictima:FindFirstChild("LeftLowerLeg") then
+	OtrasPartes["PI"] = CharVictima["LeftLowerLeg"]
+end
+
+if CharVictima:FindFirstChild("Right Leg") then
+	OtrasPartes["PD"] = CharVictima["Right Leg"]
+	tipogod = "R6"
+elseif CharVictima:FindFirstChild("RightLowerLeg") then
+	OtrasPartes["PD"] = CharVictima["RightLowerLeg"]
+	tipogod = "R15"
+end
+
+if CharVictima:FindFirstChild("Right Arm") then
+	OtrasPartes["RA"] = CharVictima["Right Arm"]
+elseif CharVictima:FindFirstChild("RightLowerArm") then
+	OtrasPartes["RA"] = CharVictima["RightLowerArm"]
+end
+
+if CharVictima:FindFirstChild("Left Arm") then
+	OtrasPartes["LA"] = CharVictima["Left Arm"]
+elseif CharVictima:FindFirstChild("LeftLowerArm") then
+	OtrasPartes["LA"] = CharVictima["LeftLowerArm"]
+end
+
+if CharVictima:FindFirstChild("Torso") then
+	OtrasPartes["Tor"] = CharVictima["Torso"]
+elseif CharVictima:FindFirstChild("UpperTorso") then
+	OtrasPartes["Tor"] = CharVictima["UpperTorso"]
+end
+
+OtrasPartes["Hea"] = CharVictima["Head"]
+
+local MiPieIzquierdo = MyChar["Left Leg"]
+local MiPieDerecho = MyChar["Right Leg"]
+
+local MiBrazoDe = MyChar["Right Arm"]
+local MiBrazoIz = MyChar["Left Arm"]
+
+local MiTorso = MyChar["Torso"]
+local MiHead = MyChar["Head"]
+
+for i,v in pairs(MyChar:GetDescendants()) do
+	if v:IsA("Motor6D") or v.Name == "AccessoryWeld" then 
+		v:Destroy()
+	end
+end
+
+local ObtenerHats = function(jugador)
+	local hats = {}
+
+	for i,v in pairs(jugador:GetChildren()) do
+		if v:IsA("Accessory") then
+			table.insert(hats, v)
+			--print("Otro", v.Name)
+		end
+	end
+	return hats
+end
+
+local ObtenerMisHats = function()
+	local mishats = {}
+
+	for i,v in pairs(MyChar:GetChildren()) do
+		if v:IsA("Accessory") then
+			table.insert(mishats, v)
+			--print("ElGuapo", v.Name)
+			Align(v.Handle, MyRoot)
+
+			if v.Handle:FindFirstChild("Mesh") then
+				v.Handle.Mesh:Destroy()
+			end
+
+			if v.Handle:FindFirstChild("SpecialMesh") then
+				v.Handle.SpecialMesh:Destroy()
+			end
+		end
+	end
+
+	return mishats
+end
+
+misHats = ObtenerMisHats()
+HatsVictima = ObtenerHats(CharVictima)
+
+
+local CambiarAnim = function(usuario, root)
+	local CharFuncion = usuario.Character
+
+	if root then
+		if tonumber(root) == 1 then
+			if CharFuncion:FindFirstChild("HumanoidRootPart") then
+			    RootVictoma = CharFuncion.HumanoidRootPart
+			end
+		elseif tonumber(root) == 2 then
+			if CharFuncion:FindFirstChild("Torso") then
+				RootVictoma = CharFuncion.Torso
+			end
+		elseif tonumber(root) == 3 then
+			if CharFuncion:FindFirstChild("Left Leg") then
+				RootVictoma = CharFuncion["Left Leg"]
+			end
+		elseif tonumber(root) == 4 then
+			if CharFuncion:FindFirstChild("Right Leg") then
+				RootVictoma = CharFuncion["Right Leg"]
+			end
+		elseif tonumber(root) == 5 then
+			if CharFuncion:FindFirstChild("FRootPart") then
+				RootVictoma = CharFuncion["FRootPart"]
+			end
+		end
+	else
+		if CharFuncion:FindFirstChild("HumanoidRootPart") then
+		    RootVictoma = CharFuncion.HumanoidRootPart
+		else
+			print("Imposible, no tiene parte de partida")
+			return false
+		end    
+	end
+
+	HatsVictima = ObtenerHats(usuario)
+	
+
+	if CharFuncion:FindFirstChild("Left Leg") then
+		OtrasPartes["PI"] = CharFuncion["Left Leg"]
+	elseif CharFuncion:FindFirstChild("LeftLowerLeg") then
+		OtrasPartes["PI"] = CharFuncion["LeftLowerLeg"]
+	else
+		OtrasPartes["PI"] = nil    
+	end
+	
+	
+	if CharFuncion:FindFirstChild("Right Leg") then
+		OtrasPartes["PD"] = CharFuncion["Right Leg"]
+		tipogod = "R6"
+	elseif CharFuncion:FindFirstChild("RightLowerLeg") then
+		OtrasPartes["PD"] = CharFuncion["RightLowerLeg"]
+		tipogod = "R15"
+	else
+		OtrasPartes["PD"] = nil    
+	end
+	
+
+	if CharFuncion:FindFirstChild("Right Arm") then
+		OtrasPartes["RA"] = CharFuncion["Right Arm"]
+	elseif CharFuncion:FindFirstChild("RightLowerArm") then
+		OtrasPartes["RA"] = CharFuncion["RightLowerArm"]
+	else
+		OtrasPartes["RA"] = nil
+	end
+
+
+	if CharFuncion:FindFirstChild("Left Arm") then
+		OtrasPartes["LA"] = CharFuncion["Left Arm"]
+	elseif CharFuncion:FindFirstChild("LeftLowerArm") then
+		OtrasPartes["LA"] = CharFuncion["LeftLowerArm"]
+	else
+		OtrasPartes["LA"] = nil
+	end
+
+
+	if CharFuncion:FindFirstChild("Torso") then
+		OtrasPartes["Tor"] = CharFuncion["Torso"]
+	elseif CharFuncion:FindFirstChild("UpperTorso") then
+		OtrasPartes["Tor"] = CharFuncion["UpperTorso"]
+	else
+		OtrasPartes["Tor"] = nil
+	end
+	
+
+	if CharFuncion:FindFirstChild("Head") then
+		OtrasPartes["Hea"] = CharFuncion["Head"]
+	else
+		OtrasPartes["Hea"] = nil
+	end
+end
+
+local CalcularHipHeight = function(rootVictima)
+	local miHipHeight = MyChar.Humanoid.HipHeight
+	local alturaRoot = rootVictima.Position.Y
+	local ray = Ray.new(rootVictima.Position, Vector3.new(0,-5,0))
+	local hit, pos = workspace:FindPartOnRayWithIgnoreList(ray, {rootVictima})
+	local alturaSuelo = pos.Y
+	local alturaEntreRootYSuelo = alturaRoot - alturaSuelo
+	miHipHeight = alturaEntreRootYSuelo
+	return miHipHeight
+end
+
+local UltimoRoot
+
+game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
+	for i,v in pairs(dummyr15:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.CanCollide = false
+		end
+	end
+end)
+
+function NoCollisionConstraint(same)
+	for i,v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+		if v:IsA("BasePart") then
+			local Collide = Instance.new("NoCollisionConstraint",v)
+			Collide.Part0 = v
+			Collide.Part1 = same
+		end
+	end
+end
+
+for i,v in pairs(Character1:GetDescendants()) do
+	if v:IsA("BasePart") then
+		NoCollisionConstraint(v)
+	end
+end
+
+game.Players.LocalPlayer.Chatted:Connect(function(msg)
+	if msg:sub(1, 5) == "/sync" then
+		local Modo = msg:sub(7, 8)
+		local Jugador = msg:sub(9, #msg)
+		local elpepe = ""
+		
+		if not game.Players:FindFirstChild(Jugador) then
+			for i,v in pairs(game.Players:GetChildren()) do
+				if v.Name:sub(1, #Jugador) == Jugador then
+					elpepe = v.Name
+				end
+			end
+		end
+
+		if game.Players:FindFirstChild(elpepe) then
+			CambiarAnim(game.Players[elpepe], tonumber(Modo))
+			Notificacion("Sincronizando con: "..elpepe, "Aviso", 5)
+		end
+	end
+
+end)
+
+Align(MiPieIzquierdo, MyRoot)
+Align(MiPieDerecho, MyRoot)
+Align(MiBrazoIz, MyRoot)
+Align(MiBrazoDe, MyRoot)
+Align(MiTorso, MyRoot)
+Align(MiHead, MyRoot)
+
+local AnimSteal = {}
+
+game:GetService("RunService").RenderStepped:Connect(function()
+
+	if OtrasPartes["PI"] then
+		MiPieIzquierdo.Velocity = Vector3.new(-25.05, 0, -25.05)
+		MiPieIzquierdo.CFrame  = MyRoot.CFrame * RootVictoma.CFrame:inverse() * OtrasPartes["PI"].CFrame * CFrame.Angles(0, math.rad(90), 0)
+	else
+		MiPieIzquierdo.CFrame = MyRoot.CFrame * CFrame.new(0, 30, 0)
+	end
+	
+	
+	if OtrasPartes["PD"] then
+		MiPieDerecho.Velocity = Vector3.new(-25.05, 0, -25.05)
+		MiPieDerecho.CFrame  = MyRoot.CFrame * RootVictoma.CFrame:inverse() * OtrasPartes["PD"].CFrame * CFrame.Angles(0, math.rad(90), 0)
+	else
+		MiPieDerecho.CFrame = MyRoot.CFrame * CFrame.new(0, 30, 0)
+	end
+	
+	
+	if OtrasPartes["LA"] then
+		MiBrazoIz.Velocity = Vector3.new(-25.05, 0, -25.05)
+		MiBrazoIz.CFrame  = MyRoot.CFrame * RootVictoma.CFrame:inverse() * OtrasPartes["LA"].CFrame * CFrame.Angles(0, math.rad(90), 0)
+	else
+		MiBrazoIz.CFrame = MyRoot.CFrame * CFrame.new(0, 30, 0)
+	end
+	
+	
+	if OtrasPartes["RA"] then
+		MiBrazoDe.Velocity = Vector3.new(-25.05, 0, -25.05)
+		MiBrazoDe.CFrame  = MyRoot.CFrame * RootVictoma.CFrame:inverse() * OtrasPartes["RA"].CFrame * CFrame.Angles(0, math.rad(90), 0)
+	else 
+		MiBrazoDe.CFrame = MyRoot.CFrame * CFrame.new(0, 30, 0)
+	end
+
+
+	if OtrasPartes["Hea"] then
+		MiHead.Velocity = Vector3.new(-25.05, 0, -25.05)
+		MiHead.CFrame  = MyRoot.CFrame * RootVictoma.CFrame:inverse() * OtrasPartes["Hea"].CFrame * CFrame.Angles(0, math.rad(0), 0)
+	else 
+		MiHead.CFrame = MyRoot.CFrame * CFrame.new(0, 30, 0)
+	end
+	
+	
+	if OtrasPartes["Tor"] then
+		MiTorso.Velocity = Vector3.new(-25.05, 0, -25.05)
+
+		if tipogod == "R6" then
+			MiTorso.CFrame  = MyRoot.CFrame * RootVictoma.CFrame:inverse() * OtrasPartes["Tor"].CFrame * CFrame.Angles(0, math.rad(0), 0)
+		else
+			MiTorso.CFrame  = MyRoot.CFrame * RootVictoma.CFrame:inverse() * OtrasPartes["Tor"].CFrame * CFrame.new(0, -0.3, 0) * CFrame.Angles(0, math.rad(0), 0)
+		end
+
+		HatsVictima = ObtenerHats(OtrasPartes["Tor"].Parent)
+	else
+		MiTorso.CFrame = MyRoot.CFrame * CFrame.new(0, 30, 0)
+	end
+
+	if UltimoRoot ~= RootVictoma then
+		UltimoRoot = RootVictoma
+
+		if tipogod == "R15" then
+			if OtrasPartes["Tor"] then
+				MyChar.Humanoid.HipHeight = CalcularHipHeight(OtrasPartes["Tor"])
+			end
+		else
+			MyChar.Humanoid.HipHeight = 0
+		end
+	end
+
+	if #HatsVictima > 0 then
+		for i,v in pairs(HatsVictima) do
+		local v2 = misHats[i]
+		if not v.Handle:FindFirstChild("AccessoryWeld") then
+			if v2 then
+				v2.Handle.Velocity = Vector3.new(-25.05, 0, -25.05)
+				v2.Handle.CFrame = MyRoot.CFrame * RootVictoma.CFrame:inverse() * v.Handle.CFrame * CFrame.Angles(0, math.rad(0), 0)
+			end
+
+			if #misHats > #HatsVictima then
+				for i2,v3 in pairs(misHats) do
+					if i2 > #HatsVictima then
+						v3.Handle.Velocity = Vector3.new(-25.05, 0, -25.05)
+						v3.Handle.CFrame = MyRoot.CFrame * CFrame.new(0, 30, 0)
+					end
+				end
+			end
+		 else
+		     v2.Handle.CFrame = MyRoot.CFrame * CFrame.new(0, 30, 0)
+		 end
+	    end
+	else
+		for i,v in pairs(misHats) do
+			v.Handle.Velocity = Vector3.new(0, -75, 0)
+			v.Handle.CFrame = MyRoot.CFrame * CFrame.new(0, 30, 0)
+		end
+	end
+
+    --print(#AnimKeyFrames)
+end)
+
+
+Notificacion("Script cargado con exito: ".. CharVictima.Name, "Bien", 4)
+
+
+local Robando = false
+
+local setclipboardArray = function(array)
+      local str = ""     
+      local tablas = {}
+      
+      for i,v in pairs(array) do
+          if type(v) == "table" then
+              table.insert(tablas, v)
+          else
+              str = str..tostring(v).."\n"
+          end
+      end
+      
+      for i,v in pairs(tablas) do
+          str = str.."['"..tostring(i).."'] = {\n"
+          for i2,v2 in pairs(v) do
+              if type(v2) == "table" then
+                  str = str.."['"..tostring(i2).."'] = {\n"
+                  for i3,v3 in pairs(v2) do
+                      str = str.."['"..tostring(i3).."'] = CFrame.new("..tostring(v3).."),\n"
+                  end
+                  str = str.."},\n"
+              else
+                  str = str.."['"..tostring(i2).."'] = CFrame.new("..tostring(v2).."),\n"
+              end
+          end
+          str = str.."},\n"
+      end
+      
+      setclipboard("local Anim = {\n".. str.."\n}")
+  end
+
+UserInput.InputBegan:Connect(function(key, oris)
+    if key.KeyCode == Enum.KeyCode.Q then
+        if Robando == false then
+            Robando = true
+            Notificacion("CLONANDO ANIMACION.", "Aviso", 5)
+        else
+            Robando = false
+            setclipboardArray(AnimSteal)
+            Notificacion("Animacion copiada al portapapeles.", "Bien", 5)
+        end
+    end
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    if Robando == true then
+        local keyframe = {}
+        if OtrasPartes["PI"] then
+		    keyframe["PI"] = (RootVictoma.CFrame:inverse() * OtrasPartes["PI"].CFrame * CFrame.Angles(0, math.rad(90), 0))
+        end
+    
+		if OtrasPartes["PD"] then
+			keyframe["PD"] = (RootVictoma.CFrame:inverse() * OtrasPartes["PD"].CFrame * CFrame.Angles(0, math.rad(90), 0))
+		else
+			keyframe["PD"] = CFrame.new(0, 30, 0)
+		end
+
+
+		if OtrasPartes["LA"] then
+			keyframe["LA"] = (RootVictoma.CFrame:inverse() * OtrasPartes["LA"].CFrame * CFrame.Angles(0, math.rad(90), 0))
+		else
+			keyframe["LA"] = CFrame.new(0, 30, 0)
+		end
+
+
+		if OtrasPartes["RA"] then
+			keyframe["RA"] = (RootVictoma.CFrame:inverse() * OtrasPartes["RA"].CFrame * CFrame.Angles(0, math.rad(90), 0))
+		else 
+			keyframe["RA"] = CFrame.new(0, 30, 0)
+		end
+
+
+		if OtrasPartes["Hea"] then
+			keyframe["Hea"] = (RootVictoma.CFrame:inverse() * OtrasPartes["Hea"].CFrame * CFrame.Angles(0, math.rad(0), 0))
+		else 
+			keyframe["Hea"] = CFrame.new(0, 30, 0)
+		end
+
+
+		if OtrasPartes["Tor"] then
+
+			if tipogod == "R6" then
+				keyframe["Tor"] = (RootVictoma.CFrame:inverse() * OtrasPartes["Tor"].CFrame * CFrame.Angles(0, math.rad(0), 0))
+			else
+				keyframe["Tor"] = (RootVictoma.CFrame:inverse() * OtrasPartes["Tor"].CFrame * CFrame.new(0, -0.3, 0) * CFrame.Angles(0, math.rad(0), 0))
+			end
+
+			HatsVictima = ObtenerHats(OtrasPartes["Tor"].Parent)
+		else
+			keyframe["Tor"] = CFrame.new(0, 30, 0)
+		end
+        
+        
+        
+        
+        table.insert(AnimSteal, keyframe)
+    end
+end)
